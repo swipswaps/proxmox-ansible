@@ -1,0 +1,107 @@
+#!/bin/bash
+set -e
+
+VM_SUBNET_0=10.10.0.0/24
+VM_SUBNET_0_GATEWAY=10.10.0.1
+VM_SUBNET_1=10.10.1.0/24
+VM_SUBNET_1_GATEWAY=10.10.1.1
+
+PUBLIC_INTERFACE=br0
+VM_INTERFACE_0=vmbr0
+VM_INTERFACE_1=vmbr1
+
+exe() { ( echo "## $*"; $*; ) }
+
+reset() {
+  exe iptables -P INPUT ACCEPT
+  exe iptables -P FORWARD ACCEPT
+  exe iptables -P OUTPUT ACCEPT
+  exe iptables -t nat -F
+  exe iptables -t mangle -F
+  exe iptables -F
+  exe iptables -X
+}
+
+masquerade() {
+  if [ "$#" -ne 1 ]; then
+    echo "Specify arguments: SOURCE_SUBNET"
+    exit 1
+  fi
+  SOURCE_SUBNET=$1
+  echo 1 > /proc/sys/net/ipv4/ip_forward
+  exe iptables -t nat -A POSTROUTING -s $SOURCE_SUBNET -o $PUBLIC_INTERFACE -j MASQUERADE
+}
+
+port_forward() {
+  if [ "$#" -ne 3 ]; then
+    echo "Specify arguments: SOURCE_PORT DEST_HOST DEST_PORT"
+    exit 1
+  fi
+  SOURCE_PORT=$1; DEST_HOST=$2; DEST_PORT=$3;
+  exe iptables -t nat -A PREROUTING -p tcp -i $PUBLIC_INTERFACE \
+      --dport $SOURCE_PORT -j DNAT --to-destination $DEST_HOST:$DEST_PORT
+  exe iptables -A FORWARD -p tcp -d $DEST_HOST \
+      --dport $SOURCE_PORT -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+}
+
+port_open_tcp() {
+  if [ "$#" -ne 2 ]; then
+    echo "Specify arguments: INTERFACE DEST_PORT"
+    exit 1
+  fi
+  INTERFACE=$1; DEST_PORT=$2;
+  exe iptables -A INPUT -p tcp -m tcp --dport $DEST_PORT -i $INTERFACE -j ACCEPT
+}
+
+port_open_udp() {
+  if [ "$#" -ne 2 ]; then
+    echo "Specify arguments: INTERFACE DEST_PORT"
+    exit 1
+  fi
+  INTERFACE=$1; DEST_PORT=$2;
+  exe iptables -A INPUT -p udp -m udp --dport $DEST_PORT -i $INTERFACE -j ACCEPT
+}
+
+port_open_dhcp() {
+  if [ "$#" -ne 1 ]; then
+    echo "Specify arguments: INTERFACE"
+    exit 1
+  fi
+  INTERFACE=$1;
+  exe iptables -A INPUT -p udp --dport 67:69 --sport 67:69 -i $INTERFACE -j ACCEPT
+}
+
+port_open_tftp() {
+  if [ "$#" -ne 2 ]; then
+    echo "Specify arguments: INTERFACE GATEWAY"
+    exit 1
+  fi
+  INTERFACE=$1; GATEWAY=$2
+  exe modprobe ip_conntrack ip_conntrack_tftp
+  # TFTP requires all udp ports to be opened to the gateway:
+  exe iptables -A INPUT -i $INTERFACE -d $GATEWAY/32 -p udp -j ACCEPT
+}
+
+default_rules() {
+  exe iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+  exe iptables -A INPUT -i lo -j ACCEPT
+  exe iptables -P INPUT DROP
+  exe iptables -P FORWARD ACCEPT
+  exe iptables -P OUTPUT ACCEPT
+}
+
+
+## Reset all rules:
+reset
+
+## Core rules
+port_open_tcp $PUBLIC_INTERFACE 22
+port_open_tcp $PUBLIC_INTERFACE 80
+port_open_tcp $PUBLIC_INTERFACE 443
+
+## IP Masquerading for private VM subnets
+masquerade $VM_SUBNET_0
+masquerade $VM_SUBNET_1
+
+## default rules catch-all
+default_rules

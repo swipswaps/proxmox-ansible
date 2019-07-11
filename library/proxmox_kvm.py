@@ -861,6 +861,14 @@ def main():
             virtio=dict(type='dict', default=None),
             vmid=dict(type='int', default=None),
             watchdog=dict(),
+            cicustom=dict(type='dict'),
+            cipassword=dict(),
+            citype=dict(choices=['configdrive2', 'nocloud']),
+            ciuser=dict(),
+            ipconfig=dict(type='dict', options=['gw','gw6','ip','ip6']),
+            nameserver=dict(),
+            searchdomain=dict(),
+            sshkeys=dict(type='list', default=None)
         ),
         mutually_exclusive=[('delete', 'revert'), ('delete', 'update'), ('revert', 'update'), ('clone', 'update'), ('clone', 'delete'), ('clone', 'revert')],
         required_one_of=[('name', 'vmid',)],
@@ -1016,7 +1024,18 @@ def main():
                       vcpus=module.params['vcpus'],
                       vga=module.params['vga'],
                       virtio=module.params['virtio'],
-                      watchdog=module.params['watchdog'])
+                      watchdog=module.params['watchdog'],
+
+                      ## EnigmaCurry: Adding more properites for cloud-init:
+                      cicustom=module.params['cicustom'],
+                      cipassword=module.params['cipassword'],
+                      citype=module.params['citype'],
+                      ciuser=module.params['ciuser'],
+                      ipconfig=module.params['ipconfig'],
+                      nameserver=module.params['nameserver'],
+                      searchdomain=module.params['searchdomain'],
+                      sshkeys=module.params['sshkeys'],
+            )
 
             if not clone:
                 get_vminfo(module, proxmox, node, vmid,

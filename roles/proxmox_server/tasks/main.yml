@@ -4,6 +4,18 @@
     dest: /etc/hosts
     mode: 0644
 
+- name: Create /etc/firewall.sh
+  template:
+    src: firewall.sh.j2
+    dest: /etc/firewall.sh
+    mode: 0700
+
+- name: Create /etc/network/interfaces
+  template:
+    src: interfaces.j2
+    dest: /etc/network/interfaces
+    mode: 0600
+
 ## TODO: pvecm add requires user interaction to enter the password
 ## Possibility to use expect: http://marvelley.com/blog/2014/04/23/handling-interactive-ansible-tasks/
 ## So this doesn't work for now:

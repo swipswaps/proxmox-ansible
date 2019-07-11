@@ -3,29 +3,29 @@
     url: "{{ ubuntu_bionic_cloud_image_url }}"
     dest: "{{ ubuntu_bionic_cloud_image }}"
 
-- name: Check for ubuntu_bionic_m1_nano template type
-  command: "qm config {{ ubuntu_bionic_m1_nano_template_id }}"
-  register: ubuntu_bionic_m1_nano_template_status
+- name: Check for ubuntu_bionic template type
+  command: "qm config {{ ubuntu_bionic_template_id }}"
+  register: ubuntu_bionic_template_status
   ignore_errors: true
   changed_when: false
 
-- name: Create ubuntu_bionic_m1_nano template (1 core 512MB RAM)
-  when: ubuntu_bionic_m1_nano_template_status.rc > 0
-  command: "qm create {{ ubuntu_bionic_m1_nano_template_id }} -name ubuntu-bionic.m1-nano -memory 512 -net0 virtio,bridge=vmbr0 -serial0 socket -vga serial0"
+- name: Create ubuntu_bionic template (1 core 512MB RAM)
+  when: ubuntu_bionic_template_status.rc > 0
+  command: "qm create {{ ubuntu_bionic_template_id }} -name ubuntu-bionic -memory 512 -net0 virtio,bridge=vmbr0 -serial0 socket -vga serial0"
 
-- name: Import ubuntu_bionic_m1_nano disk image
-  when: ubuntu_bionic_m1_nano_template_status.rc > 0
-  command: "qm importdisk {{ ubuntu_bionic_m1_nano_template_id }} {{ ubuntu_bionic_cloud_image }} ceph-vm"
+- name: Import ubuntu_bionic disk image
+  when: ubuntu_bionic_template_status.rc > 0
+  command: "qm importdisk {{ ubuntu_bionic_template_id }} {{ ubuntu_bionic_cloud_image }} ceph-vm"
 
-- name: Attach ubuntu_bionic_m1_nano disk
-  when: ubuntu_bionic_m1_nano_template_status.rc > 0
-  command: "qm set {{ ubuntu_bionic_m1_nano_template_id }} -scsihw virtio-scsi-pci -scsi0 ceph-vm:vm-{{ ubuntu_bionic_m1_nano_template_id }}-disk-0"
+- name: Attach ubuntu_bionic disk
+  when: ubuntu_bionic_template_status.rc > 0
+  command: "qm set {{ ubuntu_bionic_template_id }} -scsihw virtio-scsi-pci -scsi0 ceph-vm:vm-{{ ubuntu_bionic_template_id }}-disk-0"
 
-- name: Create ubuntu_bionic_m1_nano boot settings
-  when: ubuntu_bionic_m1_nano_template_status.rc > 0
-  command: "qm set {{ ubuntu_bionic_m1_nano_template_id }} -ide2 ceph-vm:cloudinit -boot c -bootdisk scsi0"
+- name: Create ubuntu_bionic boot settings
+  when: ubuntu_bionic_template_status.rc > 0
+  command: "qm set {{ ubuntu_bionic_template_id }} -ide2 ceph-vm:cloudinit -boot c -bootdisk scsi0"
 
-- name: Convert ubuntu_bionic_m1_nano to template
-  when: ubuntu_bionic_m1_nano_template_status.rc > 0
-  command: "qm template {{ ubuntu_bionic_m1_nano_template_id }}"
+- name: Convert ubuntu_bionic to template
+  when: ubuntu_bionic_template_status.rc > 0
+  command: "qm template {{ ubuntu_bionic_template_id }}"
 

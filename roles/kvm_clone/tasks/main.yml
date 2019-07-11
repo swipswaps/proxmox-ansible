@@ -1,0 +1,51 @@
+## Only modify KVM if it doesn't already exist:
+- name: "Get KVM id={{ id }} state"
+  proxmox_kvm:
+    api_user: "{{ proxmox_kvm_admin }}"
+    api_password: "{{ proxmox_kvm_admin_password }}"
+    api_host: "{{ proxmox_master_node }}"
+    node: "{{ node }}"
+    vmid: "{{ id }}"
+    state: current
+  register: kvm_state
+  ignore_errors: true
+
+- name: "Clone KVM template={{ template }} id={{ id }}"
+  proxmox_kvm:
+    api_user: "{{ proxmox_kvm_admin }}"
+    api_password: "{{ proxmox_kvm_admin_password }}"
+    api_host: "{{ proxmox_master_node }}"
+    node: "{{ node }}"
+    clone: "{{ template }}"
+    newid: "{{ id }}"
+    name: "{{ name }}"
+    full: 0
+  when: kvm_state.failed
+
+- name: "Configure KVM id={{ id }}"
+  proxmox_kvm:
+    api_user: "{{ proxmox_kvm_admin }}"
+    api_password: "{{ proxmox_kvm_admin_password }}"
+    api_host: "{{ proxmox_master_node }}"
+    node: "{{ node }}"
+    name: "{{ name }}"
+    vmid: "{{ id }}"
+    cores: "{{ cores }}"
+    sockets: "{{ sockets }}"
+    memory: "{{ memory }}"
+    ciuser: "{{ ciuser }}"
+    cipassword: "{{ cipassword }}"
+    ipconfig: "{{ ipconfig }}"
+    nameserver: "{{ nameserver }}"
+    searchdomain: "{{ searchdomain }}"
+    sshkeys: "{{ \"\n\".join(sshkeys)|urlencode|replace('/','%2F') }}"
+    update: yes
+  when: kvm_state.failed
+
+- name: "Set KVM id={{ id }} state={{state}}"
+  proxmox_kvm:
+    api_user: "{{ proxmox_kvm_admin }}"
+    api_password: "{{ proxmox_kvm_admin_password }}"
+    api_host: "{{ proxmox_master_node }}"
+    vmid: "{{ id }}"
+    state: "{{ state }}"

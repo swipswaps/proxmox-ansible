@@ -2,64 +2,89 @@
   hosts: proxmox
   roles:
     - ssh_server
+  tags:
+    - install
 
 - name: Create master cluster node
   hosts: proxmox_master
   roles:
     - proxmox_master
+  tags:
+    - install
 
 - name: Add cluster nodes
   hosts: proxmox
   roles:
     - proxmox_server
+  tags:
+    - install
 
 - name: Install ceph dependencies
   hosts: ceph
   roles:
     - ceph_node
+  tags:
+    - install
 
 - name: Create ceph cluster
   hosts: ceph_master
   roles:
     - ceph_master
+  tags:
+    - install
 
 - name: Create ceph monitors
   hosts: ceph_mon
   roles:
     - ceph_mon
+  tags:
+    - install
 
 - name: Create ceph managers
   hosts: ceph_mgr
   roles:
     - ceph_mgr
+  tags:
+    - install
 
 - name: Create ceph OSDs
   hosts: ceph_osd
   roles:
     - ceph_osd
+  tags:
+    - install
 
 - name: Create ceph pool
   hosts: ceph_master
   roles:
     - ceph_pool
+  tags:
+    - install
 
 - name: Create ceph metadata service (MDS)
   hosts: ceph_mds
   roles:
     - ceph_mds
+  tags:
+    - install
 
 - name: Create CephFS
   hosts: ceph_master
   roles:
     - ceph_fs
+  tags:
+    - install
 
 - name: Create KVM templates
   hosts: proxmox_master
   roles:
     - kvm_templates
+  tags:
+    - config
 
 - name: Create KVM Core Virtual Machines
   hosts: proxmox_master
   roles:
     - kvm_core_vms
-
+  tags:
+    - config

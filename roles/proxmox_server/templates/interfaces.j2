@@ -31,20 +31,15 @@ iface br0 inet static
     # to setup IP Masquerading and port forwards:
     post-up /etc/firewall.sh
 
-auto vmbr0
-iface vmbr0 inet static
-    address 10.10.0.1
-    netmask 255.255.255.0
-    bridge_ports none
-    bridge_stp off
-    bridge_maxwait 0
-    bridge_fd 0
+# vmbrX are Virtual Machine subnets
 
-auto vmbr1
-iface vmbr1 inet static
-    address 10.10.1.1
+{% for ip in proxmox_vmbr_ips %}
+auto vmbr{{ loop.index0 }}
+iface vmbr{{ loop.index0 }} inet static
+    address {{ ip }}
     netmask 255.255.255.0
     bridge_ports none
     bridge_stp off
     bridge_maxwait 0
     bridge_fd 0
+{% endfor %}

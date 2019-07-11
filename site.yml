@@ -24,56 +24,56 @@
   roles:
     - ceph_node
   tags:
-    - install
+    - ceph
 
 - name: Create ceph cluster
   hosts: ceph_master
   roles:
     - ceph_master
   tags:
-    - install
+    - ceph
 
 - name: Create ceph monitors
   hosts: ceph_mon
   roles:
     - ceph_mon
   tags:
-    - install
+    - ceph
 
 - name: Create ceph managers
   hosts: ceph_mgr
   roles:
     - ceph_mgr
   tags:
-    - install
+    - ceph
 
 - name: Create ceph OSDs
   hosts: ceph_osd
   roles:
     - ceph_osd
   tags:
-    - install
+    - ceph
 
 - name: Create ceph pool
   hosts: ceph_master
   roles:
     - ceph_pool
   tags:
-    - install
+    - ceph
 
 - name: Create ceph metadata service (MDS)
   hosts: ceph_mds
   roles:
     - ceph_mds
   tags:
-    - install
+    - ceph
 
 - name: Create CephFS
   hosts: ceph_master
   roles:
     - ceph_fs
   tags:
-    - install
+    - ceph
 
 - name: Create KVM templates
   hosts: proxmox_master

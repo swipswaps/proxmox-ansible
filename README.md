@@ -160,28 +160,22 @@ The `site.yml` playbook will do the following:
  * Create Proxmox cluster
  * Create Ceph cluster and storage
 
-Run the playbook:
+Create the initial cluster config by running the `install` tag:
 
 ```
-ansible-playbook site.yml
+ansible-playbook site.yml --tags install
 ```
 
-NOTE: Currently, the `Check cluster status` task will fail when adding nodes to
-the cluster. This is because this playbook cannot add the nodes without
-interactively entering the root password. 
-
-For the time being, you must add `nuc2` and `nuc3` to the cluster manually:
-
-SSH to `nuc2` and `nuc3` and run on both :
+Ensure you got no errors on the previous step, then create the ceph cluster by
+running the `ceph` tag:
 
 ```
-pvecm add 192.168.3.14
+ansible-playbook site.yml --tags ceph
 ```
 
-The IP address is the static IP of `nuc1`. Use your own IP for your environment.
-
-Once all the nodes are added to the cluster, run the playbook again:
+Run the rest of the config (Create VMs and templates):
 
 ```
-ansible-playbook site.yml
+ansible-playbook site.yml --tags config
 ```
+

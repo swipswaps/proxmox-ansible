@@ -4,10 +4,7 @@ cores: 1
 sockets: 1
 state: present
 ciuser: ubuntu
-cipassword: ubuntu
 nameserver: 1.0.0.1
 searchdomain: "{{ proxmox_domain }}"
-ipconfig:
-  ip: dhcp
-  ip6: dhcp
-
+ip_address: "dhcp"
+gateway: "dhcp"

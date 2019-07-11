@@ -34,9 +34,8 @@
     sockets: "{{ sockets }}"
     memory: "{{ memory }}"
     ciuser: "{{ ciuser }}"
-    cipassword: "{{ cipassword }}"
-    ipconfig: "{{ ipconfig }}"
     nameserver: "{{ nameserver }}"
+    ipconfig0: "gw={{ gateway }},ip={{ ip_address }}"
     searchdomain: "{{ searchdomain }}"
     sshkeys: "{{ \"\n\".join(sshkeys)|urlencode|replace('/','%2F') }}"
     update: yes

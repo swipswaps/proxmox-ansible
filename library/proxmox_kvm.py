@@ -865,7 +865,7 @@ def main():
             cipassword=dict(),
             citype=dict(choices=['configdrive2', 'nocloud']),
             ciuser=dict(),
-            ipconfig=dict(type='dict', options=['gw','gw6','ip','ip6']),
+            ipconfig0=dict(),
             nameserver=dict(),
             searchdomain=dict(),
             sshkeys=dict(type='list', default=None)
@@ -1031,7 +1031,7 @@ def main():
                       cipassword=module.params['cipassword'],
                       citype=module.params['citype'],
                       ciuser=module.params['ciuser'],
-                      ipconfig=module.params['ipconfig'],
+                      ipconfig0=module.params['ipconfig0'],
                       nameserver=module.params['nameserver'],
                       searchdomain=module.params['searchdomain'],
                       sshkeys=module.params['sshkeys'],

@@ -24,7 +24,7 @@ iface br0 inet static
     post-up echo 1 > /proc/sys/net/ipv4/conf/br0/proxy_arp
     # Add additional public ip addresses if available:
     {% for ip in proxmox_public_ips[1:] %}
-    post-up ip addr add {{ ip }}/{{ cidr }} brd + dev br0
+    post-up ip addr add {{ ip }}/{{ proxmox_public_netmask }} brd + dev br0
     {% endfor  %}
 
     # On startup run the external firewall script 

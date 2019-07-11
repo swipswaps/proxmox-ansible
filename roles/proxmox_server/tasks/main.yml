@@ -9,6 +9,7 @@
     src: firewall.sh.j2
     dest: /etc/firewall.sh
     mode: 0700
+  notify: restart networking
 
 - name: Create /etc/network/interfaces
   template:

@@ -5,9 +5,9 @@ proxmox_root: "root@pam"
 proxmox_root_password: "{{ vault_proxmox_root_password }}"
 proxmox_domain: "app.lan.rymcg.tech"
 proxmox_master_node: nuc1
+promox_public_network: 192.168.3.0/24
 proxmox_master_ip: 192.168.3.14
 proxmox_public_netmask: 255.255.255.0
-proxmox_public_cidr: "/24"
 proxmox_public_gateway: 192.168.3.1
 
 proxmox_kvm_admin: "root@pam"

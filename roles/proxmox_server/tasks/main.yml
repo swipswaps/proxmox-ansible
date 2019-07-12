@@ -22,7 +22,7 @@
   uri:
     url: "https://localhost:8006/api2/json/access/ticket"
     method: POST
-    validate_certs: False
+    validate_certs: "{{ proxmox_verify_ssl }}"
     body_format: form-urlencoded
     body:
       username: "{{ proxmox_root }}"
@@ -33,7 +33,7 @@
   uri:
     url: "https://localhost:8006/api2/json/cluster/config/join"
     method: GET
-    validate_certs: False
+    validate_certs: "{{ proxmox_verify_ssl }}"
     headers: 
       Cookie: "PVEAuthCookie={{ proxmox_local_auth_token.json.data.ticket }}"
       CSRFPreventionToken: "{{ proxmox_local_auth_token.json.data.CSRFPreventionToken }}"
@@ -45,7 +45,7 @@
   uri:
     url: "https://{{ proxmox_master_node }}:8006/api2/json/access/ticket"
     method: POST
-    validate_certs: False
+    validate_certs: "{{ proxmox_verify_ssl }}"
     body_format: form-urlencoded
     body:
       username: "{{ proxmox_root }}"
@@ -57,7 +57,7 @@
   uri:
     url: "https://{{ proxmox_master_node }}:8006/api2/json/cluster/config/join"
     method: GET
-    validate_certs: False
+    validate_certs: "{{ proxmox_verify_ssl }}"
     headers: 
       Cookie: "PVEAuthCookie={{ proxmox_master_auth_token.json.data.ticket }}"
       CSRFPreventionToken: "{{ proxmox_master_auth_token.json.data.CSRFPreventionToken }}"
@@ -68,7 +68,7 @@
   uri:
     url: "https://localhost:8006/api2/json/cluster/config/join"
     method: POST
-    validate_certs: False
+    validate_certs: "{{ proxmox_verify_ssl }}"
     headers:
       Cookie: "PVEAuthCookie={{ proxmox_local_auth_token.json.data.ticket }}"
       CSRFPreventionToken: "{{ proxmox_local_auth_token.json.data.CSRFPreventionToken }}"

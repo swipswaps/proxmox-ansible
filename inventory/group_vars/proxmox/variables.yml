@@ -10,6 +10,8 @@ proxmox_master_ip: 192.168.3.14
 proxmox_public_netmask: 255.255.255.0
 proxmox_public_gateway: 192.168.3.1
 
+proxmox_verify_ssl: False
+
 proxmox_kvm_admin: "root@pam"
 ## Read the root password from the vault and copy here at runtime:
 proxmox_kvm_admin_password: "{{ vault_proxmox_root_password }}"

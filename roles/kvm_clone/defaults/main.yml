@@ -8,3 +8,4 @@ nameserver: 1.0.0.1
 searchdomain: "{{ proxmox_domain }}"
 ip_address: "dhcp"
 gateway: "dhcp"
+disk_size: "10G"

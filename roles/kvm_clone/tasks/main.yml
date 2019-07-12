@@ -11,6 +11,7 @@
   ignore_errors: true
 
 - name: "Clone KVM template={{ template }} id={{ id }}"
+  when: kvm_state.failed
   proxmox_kvm:
     api_user: "{{ proxmox_kvm_admin }}"
     api_password: "{{ proxmox_kvm_admin_password }}"
@@ -20,9 +21,9 @@
     newid: "{{ id }}"
     name: "{{ name }}"
     full: 0
-  when: kvm_state.failed
 
 - name: "Configure KVM id={{ id }}"
+  when: kvm_state.failed
   proxmox_kvm:
     api_user: "{{ proxmox_kvm_admin }}"
     api_password: "{{ proxmox_kvm_admin_password }}"
@@ -39,7 +40,33 @@
     searchdomain: "{{ searchdomain }}"
     sshkeys: "{{ \"\n\".join(sshkeys)|urlencode|replace('/','%2F') }}"
     update: yes
+
+- name: Get promox master API auth token
   when: kvm_state.failed
+  uri:
+    url: "https://{{ proxmox_master_node }}:8006/api2/json/access/ticket"
+    method: POST
+    validate_certs: False
+    body_format: form-urlencoded
+    body:
+      username: "{{ proxmox_root }}"
+      password: "{{ proxmox_root_password }}"
+  register: proxmox_master_auth_token
+
+
+- name: "Resize disk of KVM id={{ id }}"
+  when: kvm_state.failed
+  uri:
+    url: "https://{{ proxmox_master_node }}:8006/api2/json/nodes/{{ node }}/qemu/{{ id }}/resize"
+    validate_certs: "{{ proxmox_verify_ssl }}"
+    method: PUT
+    headers: 
+      Cookie: "PVEAuthCookie={{ proxmox_master_auth_token.json.data.ticket }}"
+      CSRFPreventionToken: "{{ proxmox_master_auth_token.json.data.CSRFPreventionToken }}"
+    body_format: form-urlencoded
+    body:
+      disk: "scsi0"
+      size: "{{ disk_size }}"
 
 - name: "Set KVM id={{ id }} state={{state}}"
   proxmox_kvm:

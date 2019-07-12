@@ -88,3 +88,4 @@
     - kvm_core_vms
   tags:
     - config
+    - core

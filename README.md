@@ -16,7 +16,7 @@ more nodes. This example can theoretically survive if one of the nodes dies. Two
 of the three must still be operational for your data to survive. Do your
 backups!
 
-Hardware:
+Hardware (x3 nodes):
 
  * 4 core i7 processor (8 vCPUs)
  * 32GB RAM
@@ -178,4 +178,21 @@ Run the rest of the config (Create VMs and templates):
 ```
 ansible-playbook site.yml --tags config
 ```
+
+## Ansible tags
+
+This is a general ordering of the ansible tags and how they are nested:
+
+ * install
+   * firewall
+ * ceph
+ * config
+   * core - Core VMs
+
+You can run any given tag in isolation like so:
+
+```
+ansible-playbook site.yml --tags firewall
+```
+
 

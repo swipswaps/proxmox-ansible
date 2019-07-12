@@ -108,6 +108,7 @@
     name:
       - cloud-init
       - python-pip
+      - python3-pip
     force_apt_get: "yes"
 
 - name: Install proxmoxer module

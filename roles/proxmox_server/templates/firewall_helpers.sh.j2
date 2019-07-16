@@ -11,18 +11,23 @@ reset() {
   exe iptables -t mangle -F
   exe iptables -F
   exe iptables -X
+  exe ebtables -F INPUT
+  exe ebtables -F FORWARD
+  exe ebtables -F OUTPUT
 }
 
 masquerade() {
   if [ "$#" -ne 2 ]; then
-    echo "masquerade: Specify arguments: SOURCE_SUBNET SOURCE_INTERFACE"
+    echo "masquerade: Specify arguments: SOURCE_INTERFACE SOURCE_SUBNET"
     exit 1
   fi
-  SOURCE_SUBNET=$1; SOURCE_INTERFACE=$2
+  SOURCE_INTERFACE=$1; SOURCE_SUBNET=$2
   echo 1 > /proc/sys/net/ipv4/ip_forward
   ## Block forwarding to RFC1918 networks:
   exe iptables -A FORWARD -i $SOURCE_INTERFACE -d 192.168.0.0/16,172.16.0.0/12,10.0.0.0/8 -m state --state NEW,INVALID -j DROP
   ## NAT public network access:
+  exe iptables -A FORWARD -i $SOURCE_INTERFACE -o $PUBLIC_INTERFACE -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+  exe iptables -A FORWARD -i $PUBLIC_INTERFACE -o $SOURCE_INTERFACE -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
   exe iptables -t nat -A POSTROUTING -s $SOURCE_SUBNET -o $PUBLIC_INTERFACE -j MASQUERADE
 }
 
@@ -117,7 +122,7 @@ default_rules() {
   exe iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
   exe iptables -A INPUT -i lo -j ACCEPT
   exe iptables -P INPUT DROP
-  exe iptables -P FORWARD ACCEPT
+  exe iptables -P FORWARD DROP
   exe iptables -P OUTPUT ACCEPT
 }
 

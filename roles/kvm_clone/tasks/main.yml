@@ -29,7 +29,6 @@
     api_password: "{{ proxmox_kvm_admin_password }}"
     api_host: "{{ proxmox_master_node }}"
     node: "{{ node }}"
-    name: "{{ name }}"
     vmid: "{{ id }}"
     cores: "{{ cores }}"
     sockets: "{{ sockets }}"

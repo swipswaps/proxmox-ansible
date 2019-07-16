@@ -53,7 +53,9 @@ done
 
 ## IP Masquerading for private VM subnets
 {% for subnet in proxmox_vm_subnets %}
-masquerade {{ subnet.network }} {{ subnet.interface }}
+  {% if subnet.nat | default(True) %}
+  masquerade {{ subnet.interface }} {{ subnet.network }}
+  {% endif %}
 {% endfor %}
 
 ## default rules catch-all

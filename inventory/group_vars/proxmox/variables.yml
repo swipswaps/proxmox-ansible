@@ -21,7 +21,10 @@ proxmox_kvm_admin: "root@pam"
 ## Read the root password from the vault and copy here at runtime:
 proxmox_kvm_admin_password: "{{ vault_proxmox_root_password }}"
 
+## Virtual Machine subnets:
 proxmox_vm_subnets:
+  - network: 10.10.0.0/24
+    interface: vmbr0
   - network: 10.10.1.0/24
     interface: vmbr1
   - network: 10.10.2.0/24

@@ -1,17 +1,8 @@
 #!/bin/bash
 set -e
 
-PUBLIC_SUBNET={{ promox_public_network }}
-VM_SUBNET_0=10.10.0.0/24
-VM_SUBNET_0_GATEWAY=10.10.0.1
-VM_SUBNET_1=10.10.1.0/24
-VM_SUBNET_1_GATEWAY=10.10.1.1
-
-LOCAL_INTERFACE=lo
 PUBLIC_INTERFACE=br0
-VM_INTERFACE_0=vmbr0
-VM_INTERFACE_1=vmbr1
-CEPH_INTERFACE={{ ceph_nic }}
+PUBLIC_SUBNET={{ promox_public_network }}
 
 exe() { ( echo "## $*"; $*; ) }
 
@@ -112,10 +103,18 @@ allow_ping() {
   exe iptables -A INPUT -p icmp --icmp-type echo-request -i $INTERFACE -j ACCEPT
 }
 
+allow_private_interface() {
+  if [ "$#" -ne 1 ]; then
+    echo "Specify arguments: INTERFACE"
+    exit 1
+  fi
+  INTERFACE=$1;
+  exe iptables -A INPUT -i $INTERFACE -j ACCEPT
+}
+
 default_rules() {
   exe iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
   exe iptables -A INPUT -i lo -j ACCEPT
-  exe iptables -A INPUT -i $CEPH_INTERFACE -j ACCEPT
   exe iptables -P INPUT DROP
   exe iptables -P FORWARD ACCEPT
   exe iptables -P OUTPUT ACCEPT
@@ -125,20 +124,41 @@ default_rules() {
 ## Reset all rules:
 reset
 
-## Core rules
+## Public ports:
+# SSH
 port_open_tcp $PUBLIC_INTERFACE 22
+# Web
 port_open_tcp $PUBLIC_INTERFACE 80
+# Web
 port_open_tcp $PUBLIC_INTERFACE 443
+
+
+## Cluster ports:
+## https://pve.proxmox.com/wiki/Ports
 cluster_port_open_tcp 8006
 cluster_port_open_udp 5404
 cluster_port_open_udp 5405
 cluster_port_open_tcp 3128
 cluster_port_open_tcp 111
+
+## Ceph cluster private interface:
+{% if ceph_nic is defined %}
+allow_private_interface {{ ceph_nic }}
+{% endif %}
+
+## Ping from anywhere:
 allow_ping $PUBLIC_INTERFACE
 
 ## IP Masquerading for private VM subnets
-masquerade $VM_SUBNET_0
-masquerade $VM_SUBNET_1
+{% for subnet in proxmox_vm_subnets %}
+masquerade {{ subnet.network }}
+{% endfor %}
+
+## Allow select external subnets to access admin ports
+{% for subnet in proxmox_external_client_subnets %}
+exe iptables -A INPUT -p tcp -m tcp -s {{ subnet }} --dport 8006 -j ACCEPT
+{% endfor %}
+
 
 ## default rules catch-all
 default_rules

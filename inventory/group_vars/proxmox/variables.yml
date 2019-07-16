@@ -10,11 +10,34 @@ proxmox_master_ip: 192.168.3.14
 proxmox_public_netmask: 255.255.255.0
 proxmox_public_gateway: 192.168.3.1
 
+proxmox_external_client_subnets:
+  - 192.168.2.0/24
+
 proxmox_verify_ssl: False
 
 proxmox_kvm_admin: "root@pam"
 ## Read the root password from the vault and copy here at runtime:
 proxmox_kvm_admin_password: "{{ vault_proxmox_root_password }}"
+
+proxmox_vm_subnets:
+  - network: 10.10.1.0/24
+    interface: vmbr1
+  - network: 10.10.2.0/24
+    interface: vmbr2
+  - network: 10.10.3.0/24
+    interface: vmbr3
+  - network: 10.10.4.0/24
+    interface: vmbr4
+  - network: 10.10.5.0/24
+    interface: vmbr5
+  - network: 10.10.6.0/24
+    interface: vmbr6
+  - network: 10.10.7.0/24
+    interface: vmbr7
+  - network: 10.10.8.0/24
+    interface: vmbr8
+  - network: 10.10.9.0/24
+    interface: vmbr9
 
 ### Proxmox KVM instance sizes:
 ### (names are loosly based off AWS instance sizes)

@@ -5,11 +5,20 @@
 auto lo
 iface lo inet loopback
 
+# eno1 is the *public network interface
 auto eno1
 iface eno1 inet manual
     post-up echo 1 > /proc/sys/net/ipv4/conf/eno1/proxy_arp
 
-# br0 is the *public* network interface.
+{% if ceph_nic is defined %}
+# {{ ceph_nic }} is the ceph network interface
+auto {{ ceph_nic }}
+iface {{ ceph_nic }} inet static
+    address {{ ceph_ip }}
+    netmask 255.255.255.0
+{% endif %}
+
+# br0 is the *public* network bridge.
 auto br0
 iface br0 inet static
     # This is the static *public* ip address and gateway:
@@ -31,11 +40,11 @@ iface br0 inet static
     # to setup IP Masquerading and port forwards:
     post-up /etc/firewall.sh
 
-# vmbrX are Virtual Machine subnets
+# vmbr1 -> vmbr10 are Virtual Machine subnets
 
 {% for ip in proxmox_vmbr_ips %}
-auto vmbr{{ loop.index0 }}
-iface vmbr{{ loop.index0 }} inet static
+auto vmbr{{ loop.index }}
+iface vmbr{{ loop.index }} inet static
     address {{ ip }}
     netmask 255.255.255.0
     bridge_ports none

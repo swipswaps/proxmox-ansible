@@ -3,16 +3,3 @@
   args:
     creates: /etc/apt/sources.list.d/ceph.list
 
-- name: Configure ceph network
-  blockinfile:
-    path: /etc/network/interfaces
-    block: |
-
-      auto {{ ceph_nic }}
-
-      iface {{ ceph_nic }} inet static
-          address {{ ceph_ip }}
-          netmask 255.255.255.0
-
-  notify: restart networking
-

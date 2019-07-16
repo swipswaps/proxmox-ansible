@@ -29,7 +29,7 @@ Each node has two NICs:
 
  * `eno1` - The public internet route and management device. `192.168.3.0/24`
  * `enxAAAAAAAAAAAA` - A USB ethernet (Where the A's are the mac address) - used
-   for the private ceph network. `10.10.10.0/24`.
+   for the private ceph network. `10.11.0.0/24`.
 
 Ceph RBD (block) storage:
 

@@ -4,6 +4,15 @@
     dest: /etc/hosts
     mode: 0644
 
+- name: Create firewall helpers include
+  template:
+    src: firewall_helpers.sh.j2
+    dest: /etc/firewall_helpers.sh
+    mode: 0700
+  notify: restart firewall
+  tags:
+    - firewall
+
 - name: Create /etc/firewall.sh
   template:
     src: firewall.sh.j2

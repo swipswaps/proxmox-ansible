@@ -22,7 +22,7 @@
     name: "{{ name }}"
     full: 0
 
-- name: "Configure KVM id={{ id }}"
+- name: "Configure KVM id={{ id }} cloud_init"
   when: kvm_state.failed
   proxmox_kvm:
     api_user: "{{ proxmox_kvm_admin }}"
@@ -35,6 +35,7 @@
     sockets: "{{ sockets }}"
     memory: "{{ memory }}"
     ciuser: "{{ ciuser }}"
+    cipassword: "{{ cipassword | default(None) }}"
     nameserver: "{{ nameserver }}"
     ipconfig0: "gw={{ gateway }},ip={{ ip_address }}"
     searchdomain: "{{ searchdomain }}"
@@ -53,6 +54,18 @@
       password: "{{ proxmox_root_password }}"
   register: proxmox_master_auth_token
 
+- name: "Configure KVM id={{ id }} network"
+  when: kvm_state.failed
+  uri:
+    url: "https://{{ proxmox_master_node }}:8006/api2/json/nodes/{{ node }}/qemu/{{ id }}/config"
+    validate_certs: "{{ proxmox_verify_ssl }}"
+    method: PUT
+    headers:
+      Cookie: "PVEAuthCookie={{ proxmox_master_auth_token.json.data.ticket }}"
+      CSRFPreventionToken: "{{ proxmox_master_auth_token.json.data.CSRFPreventionToken }}"
+    body_format: form-urlencoded
+    body:
+      net0: "virtio,bridge={{ bridge }}"
 
 - name: "Resize disk of KVM id={{ id }}"
   when: kvm_state.failed

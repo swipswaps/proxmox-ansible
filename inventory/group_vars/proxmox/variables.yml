@@ -5,13 +5,15 @@ proxmox_root: "root@pam"
 proxmox_root_password: "{{ vault_proxmox_root_password }}"
 proxmox_domain: "app.lan.rymcg.tech"
 proxmox_master_node: nuc1
+proxmox_public_interface: br0
 promox_public_network: 192.168.3.0/24
 proxmox_master_ip: 192.168.3.14
 proxmox_public_netmask: 255.255.255.0
 proxmox_public_gateway: 192.168.3.1
 
 proxmox_external_client_subnets:
-  - 192.168.2.0/24
+  - 192.168.2.101/32
+  - 192.168.2.110/32
 
 proxmox_verify_ssl: False
 

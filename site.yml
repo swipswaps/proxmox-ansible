@@ -89,3 +89,12 @@
   tags:
     - config
     - core
+
+- name: Create KVM Core Virtual Machine Firewalls
+  hosts: proxmox
+  roles:
+    - kvm_core_vms_firewalls
+  tags:
+    - config
+    - core
+    - firewall

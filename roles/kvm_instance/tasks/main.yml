@@ -1,0 +1,28 @@
+- assert:
+    that:
+      - "id >= 100 and id < 9000"
+    fail_msg: "KVM ID ({{ id }}) must be within range 100 to 9000"
+
+- set_fact:
+    id: "{{ id | int}}"
+    id_str: "{{ id | string }}"
+
+- set_fact:
+    vmbr_index: "{{ id_str[0] if id < 1000 else id_str[0:2]}}"
+    ip_index: "{{ id_str[-2:] }}"
+
+- set_fact:
+    name: "{{ name | default(id_str) }}"
+    template: "{{ template | default('ubuntu_bionic') }}"
+    bridge: "vmbr{{ vmbr_index }}"
+    ip_address: "10.10.{{ vmbr_index }}.1{{ ip_index }}/24"
+    gateway: "10.10.{{ vmbr_index }}.{{ proxmox_node_ip_indexes[host] }}"
+    memory: "{{ proxmox_instance_sizes[size].ram * 1024 | int }}"
+    cores: "{{ proxmox_instance_sizes[size].cpu | int }}"
+    disk_size: "{{ volumes.root | default('10G') }}"
+    state: "{{ state | default('started') }}"
+
+- name: Create KVM instance id={{ id }}
+  include_role:
+    name: kvm_clone
+

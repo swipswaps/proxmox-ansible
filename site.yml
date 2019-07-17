@@ -75,12 +75,21 @@
   tags:
     - ceph
 
-- name: Create KVM templates
+- name: Prepare KVM template image downloads
   hosts: proxmox_master
+  roles:
+    - kvm_templates_prep
+  tags:
+    - config
+    - templates
+
+- name: Create KVM templates
+  hosts: proxmox
   roles:
     - kvm_templates
   tags:
     - config
+    - templates
 
 - name: Create KVM Core Virtual Machines
   hosts: proxmox_master
@@ -98,3 +107,4 @@
     - config
     - core
     - firewall
+

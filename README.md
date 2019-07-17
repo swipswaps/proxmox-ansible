@@ -125,15 +125,19 @@ text and save the file:
 ```
 vault_proxmox_root_password: "YOUR PROXMOX ROOT PASSPHRASE HERE"
 vault_ceph_nics:
-  nuc1: enx00aabbccddeeffgg
-  nuc2: enx00aabbccddeeffgg
-  nuc3: enx00aabbccddeeffgg
+  nuc1: "enx00aabbccddeeffgg"
+  nuc2: "enx00aabbccddeeffgg"
+  nuc3: "enx00aabbccddeeffgg"
+vault_core_ssh_keys:
+  - "ssh-rsa your-long-ssh-public-key-here"
+  - "ssh-rsa your-second-long-ssh-public-key-here"
 ```
 
 Set:
  `vault_proxmox_root_password` - the root password you used during setup.
  `vault_ceph_nics` - A mapping of hostname to the interface names for ceph. For the USB nics, this name is based off the mac address of the device (check what yours are by running `ip link`), so that's why we store it in the vault.
-
+ `vault_core_ssh_keys` - A list of ssh keys used for all the core VMs.
+ 
 Now you can double-check that the vault is encrypted:
 
 ```

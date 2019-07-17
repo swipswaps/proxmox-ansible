@@ -118,6 +118,21 @@ allow_private_interface() {
   exe iptables -A INPUT -i $INTERFACE -j ACCEPT
 }
 
+set_routes() {
+  if [ "$#" -lt 2 ]; then
+    echo "add_routes: Specify arguments: INTERFACE ROUTE1 [ROUTE2 ...]"
+    exit 1
+  fi
+  set -e
+  INTERFACE=$1;
+  shift;
+  for item; do
+    exe ip route flush $item
+    exe ip route add $item dev $INTERFACE
+  done
+}
+
+
 default_rules() {
   exe iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
   exe iptables -A INPUT -i lo -j ACCEPT

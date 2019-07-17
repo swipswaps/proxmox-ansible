@@ -1,0 +1,5 @@
+set -e
+
+source /etc/firewall_helpers.sh
+
+set_routes vmbr{{ vmbr_index }} {{ ip_address }}/32

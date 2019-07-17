@@ -53,7 +53,7 @@
       ciuser: "{{ ciuser }}"
       cipassword: "{{ cipassword | default(None) }}"
       nameserver: "{{ nameserver }}"
-      ipconfig0: "ip={{ ip_address }},gw={{ gateway }}"
+      ipconfig0: "ip={{ ip_address }}/{{ cidr | default('/24') }},gw={{ gateway }}"
       searchdomain: "{{ searchdomain }}"
       sshkeys: "{{ \"\n\".join(sshkeys)|urlencode|replace('/','%2F') }}"
 

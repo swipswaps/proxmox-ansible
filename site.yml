@@ -91,14 +91,6 @@
     - config
     - templates
 
-- name: Create KVM Core Virtual Machines
-  hosts: proxmox_master
-  roles:
-    - kvm_core_vms
-  tags:
-    - config
-    - core
-
 - name: Create KVM Core Virtual Machine Firewalls
   hosts: proxmox
   roles:
@@ -108,3 +100,11 @@
     - core
     - firewall
 
+- name: Create KVM Core Virtual Machines
+  hosts: proxmox
+  roles:
+    - kvm_core_vms
+  tags:
+    - config
+    - core
+    - firewall

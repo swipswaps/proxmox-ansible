@@ -44,8 +44,8 @@ exe iptables -A INPUT -p tcp -m tcp -s {{ subnet }} --dport 8006 -j ACCEPT
 
 ## Load extra configs from other modules:
 mkdir -p /etc/firewall.d
-for file in "$(find /etc/firewall.d/ -maxdepth 1 -name '*.sh' -print -quit)"; do
-    if [ -f $file ] && [ -x $file ]; then
+for file in /etc/firewall.d/*.sh; do
+    if [ -x "$file" ]; then
         echo "## Running firewall script: $file"
         $file
     fi
@@ -53,8 +53,16 @@ done
 
 ## IP Masquerading for private VM subnets
 {% for subnet in proxmox_vm_subnets %}
+  {% set ip_prefix=".".join(subnet.network.split(".")[0:3]) %}
   {% if subnet.nat | default(True) %}
   masquerade {{ subnet.interface }} {{ subnet.network }}
+  {% endif %}
+  {% if subnet.cluster | default(True) %}
+  {% for node, values in proxmox_nodes.items() %}
+    {% if node != inventory_hostname %}
+      set_routes $PUBLIC_INTERFACE {{ subnet.network }}
+    {% endif %}
+  {% endfor %}
   {% endif %}
 {% endfor %}
 

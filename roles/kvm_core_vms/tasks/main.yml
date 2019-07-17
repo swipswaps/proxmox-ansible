@@ -1,14 +1,3 @@
-- name: Get promox API auth token
-  uri:
-    url: "https://{{ inventory_hostname }}:8006/api2/json/access/ticket"
-    method: POST
-    validate_certs: "{{ proxmox_verify_ssl }}"
-    body_format: form-urlencoded
-    body:
-      username: "{{ proxmox_root }}"
-      password: "{{ proxmox_root_password }}"
-  register: proxmox_auth_token
-
 - name: KVM test instance 110
   include_role:
     name: kvm_instance

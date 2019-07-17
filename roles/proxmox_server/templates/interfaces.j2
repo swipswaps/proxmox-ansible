@@ -5,50 +5,41 @@
 auto lo
 iface lo inet loopback
 
-# eno1 is the *public network interface
-auto eno1
-iface eno1 inet manual
-    post-up echo 1 > /proc/sys/net/ipv4/conf/eno1/proxy_arp
+iface {{ proxmox_public_interface }} inet manual
+
+auto {{ proxmox_trunk_interface }}
+iface {{ proxmox_trunk_interface }} inet static
+        address  {{ proxmox_public_ips[0] }}
+        netmask  {{ proxmox_public_netmask }}
+        gateway  {{ proxmox_public_gateway }}
+        bridge_ports eno1
+        bridge_stp off
+        bridge_fd 0
+        bridge_vlan_aware yes
+        {% for ip in proxmox_public_ips[1:] %} 
+        post-up ip addr add {{ ip }}/{{ proxmox_public_netmask }} brd + dev {{ proxmox_trunk_interface }}
+        {% endfor  %} 
+        # On startup run the external firewall script  
+        # to setup IP Masquerading and port forwards: 
+        post-up /etc/firewall.sh 
 
 {% if ceph_nic is defined %}
-# {{ ceph_nic }} is the ceph network interface
+## {{ ceph_nic }} is the ceph network interface
 auto {{ ceph_nic }}
 iface {{ ceph_nic }} inet static
     address {{ ceph_ip }}
     netmask 255.255.255.0
 {% endif %}
 
-# br0 is the *public* network bridge.
-auto br0
-iface br0 inet static
-    # This is the static *public* ip address and gateway:
-    address {{ proxmox_public_ips[0] }}
-    netmask {{ proxmox_public_netmask }}
-    gateway {{ proxmox_public_gateway }}
-    # eno1 is the physical network interface to bridge:
-    bridge_ports eno1
-    bridge_stp off
-    bridge_fd 0	
-    bridge_maxwait 0
-    post-up echo 1 > /proc/sys/net/ipv4/conf/br0/proxy_arp
-    # Add additional public ip addresses if available:
-    {% for ip in proxmox_public_ips[1:] %}
-    post-up ip addr add {{ ip }}/{{ proxmox_public_netmask }} brd + dev br0
-    {% endfor  %}
-
-    # On startup run the external firewall script 
-    # to setup IP Masquerading and port forwards:
-    post-up /etc/firewall.sh
-
-# vmbrX are Virtual Machine subnets
-
-{% for ip in proxmox_vmbr_ips %}
-auto vmbr{{ loop.index0 }}
-iface vmbr{{ loop.index0 }} inet static
-    address {{ ip }}
-    netmask 255.255.255.0
-    bridge_ports none
-    bridge_stp off
-    bridge_maxwait 0
-    bridge_fd 0
-{% endfor %}
+{% for vlan, subnet in proxmox_vlans.items() %}
+{% set ip_address="{p}.{i}".format(p=".".join(subnet.network.split(".")[:3]), i=proxmox_nodes[inventory_hostname].id) %}
+## VM VLAN tag {{ vlan }}
+auto {{ proxmox_trunk_interface }}.{{ vlan }}
+iface  {{ proxmox_trunk_interface }}.{{ vlan }} inet static 
+    address {{ ip_address }}
+    netmask 255.255.255.0 
+    bridge_ports none 
+    bridge_stp off 
+    bridge_maxwait 0 
+    bridge_fd 0 
+{% endfor %} 

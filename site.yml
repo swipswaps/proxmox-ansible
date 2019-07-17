@@ -19,6 +19,23 @@
   tags:
     - install
 
+- name: Get promox API auth token
+  hosts: proxmox
+  tasks:
+    - uri:
+        url: "https://{{ inventory_hostname }}:8006/api2/json/access/ticket"
+        method: POST
+        validate_certs: "{{ proxmox_verify_ssl }}"
+        body_format: form-urlencoded
+        body:
+          username: "{{ proxmox_root }}"
+          password: "{{ proxmox_root_password }}"
+      register: proxmox_auth_token
+  tags:
+    - ceph
+    - config
+    - core
+
 - name: Install ceph dependencies
   hosts: ceph
   roles:

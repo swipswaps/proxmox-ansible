@@ -1,4 +1,4 @@
-PUBLIC_INTERFACE={{ proxmox_public_interface }}
+PUBLIC_BRIDGE_INTERFACE={{ proxmox_trunk_interface }}
 PUBLIC_SUBNET={{ promox_public_network }}
 
 exe() { ( echo "## $*"; $*; ) }
@@ -26,9 +26,9 @@ masquerade() {
   ## Block forwarding to RFC1918 networks:
   exe iptables -A FORWARD -i $SOURCE_INTERFACE -d 192.168.0.0/16,172.16.0.0/12,10.0.0.0/8 -m state --state NEW,INVALID -j DROP
   ## NAT public network access:
-  exe iptables -A FORWARD -i $SOURCE_INTERFACE -o $PUBLIC_INTERFACE -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
-  exe iptables -A FORWARD -i $PUBLIC_INTERFACE -o $SOURCE_INTERFACE -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
-  exe iptables -t nat -A POSTROUTING -s $SOURCE_SUBNET -o $PUBLIC_INTERFACE -j MASQUERADE
+  exe iptables -A FORWARD -i $SOURCE_INTERFACE -o $PUBLIC_BRIDGE_INTERFACE -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+  exe iptables -A FORWARD -i $PUBLIC_BRIDGE_INTERFACE -o $SOURCE_INTERFACE -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+  exe iptables -t nat -A POSTROUTING -s $SOURCE_SUBNET -o $PUBLIC_BRIDGE_INTERFACE -j MASQUERADE
 }
 
 port_forward() {
@@ -38,7 +38,7 @@ port_forward() {
   fi
   echo 1 > /proc/sys/net/ipv4/ip_forward
   SOURCE_PORT=$1; DEST_HOST=$2; DEST_PORT=$3;
-  exe iptables -t nat -A PREROUTING -p tcp -i $PUBLIC_INTERFACE \
+  exe iptables -t nat -A PREROUTING -p tcp -i $PUBLIC_BRIDGE_INTERFACE \
       --dport $SOURCE_PORT -j DNAT --to-destination $DEST_HOST:$DEST_PORT
   exe iptables -A FORWARD -p tcp -d $DEST_HOST \
       --dport $DEST_PORT -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
@@ -71,6 +71,15 @@ cluster_port_open_tcp() {
   exe iptables -A INPUT -p tcp -m tcp -s $PUBLIC_SUBNET -d $DEST_HOST --dport $DEST_PORT -j ACCEPT
 }
 
+cluster_port_open_tcp_range() {
+  if [ "$#" -ne 4 ]; then
+    echo "cluster_port_open_tcp: Specify arguments: INTERFACE DEST_HOST DEST_PORT_MIN DEST_PORT_MAX"
+    exit 1
+  fi
+  INTERFACE=$1; DEST_HOST=$2; DEST_PORT_MIN=$3; DEST_PORT_MAX=$4
+  exe iptables -A INPUT -p tcp -m tcp -s $PUBLIC_SUBNET -i $INTERFACE -m multiport --dports $DEST_PORT_MIN:$DEST_PORT_MAX -j ACCEPT
+}
+
 cluster_port_open_udp() {
   if [ "$#" -ne 3 ]; then
     echo "cluster_port_open_udp: Specify arguments: INTERFACE DEST_HOST DEST_PORT"
@@ -78,6 +87,15 @@ cluster_port_open_udp() {
   fi
   INTERFACE=$1; DEST_HOST=$2; DEST_PORT=$3;
   exe iptables -A INPUT -p udp -m udp -s $PUBLIC_SUBNET -d $DEST_HOST --dport $DEST_PORT -j ACCEPT
+}
+
+cluster_port_open_udp_range() {
+  if [ "$#" -ne 4 ]; then
+    echo "cluster_port_open_udp: Specify arguments: INTERFACE DEST_HOST DEST_PORT_MIN DEST_PORT_MAX"
+    exit 1
+  fi
+  INTERFACE=$1; DEST_HOST=$2; DEST_PORT_MIN=$3; DEST_PORT_MAX=$4
+  exe iptables -A INPUT -p udp -m udp -s $PUBLIC_SUBNET -i $INTERFACE -m multiport --dports $DEST_PORT_MIN:$DEST_PORT_MAX -j ACCEPT
 }
 
 port_open_dhcp() {
@@ -141,7 +159,7 @@ default_rules() {
   exe iptables -P OUTPUT ACCEPT
 }
 
-export PUBLIC_INTERFACE
+export PUBLIC_BRIDGE_INTERFACE
 export PUBLIC_SUBNET
 export -f exe
 export -f port_open_tcp

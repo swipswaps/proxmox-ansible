@@ -15,6 +15,12 @@
 
 - set_fact:
     template_id: "{{ proxmox_template_ids[template][inventory_hostname]  }}"
+    ip_address: "{{ ip_address }}"
+    cidr: "{{ cidr | default(24)}}"
+
+- debug: var="ip_address"
+- debug: var="cidr"
+
 
 - name: "Clone KVM template={{ template_id }} id={{ id }} host={{ host }}"
   when: kvm_state.failed
@@ -53,7 +59,7 @@
       ciuser: "{{ ciuser }}"
       cipassword: "{{ cipassword | default(None) }}"
       nameserver: "{{ nameserver }}"
-      ipconfig0: "ip={{ ip_address }}/{{ cidr | default('/24') }},gw={{ gateway }}"
+      ipconfig0: "ip={{ ip_address }}/{{ cidr }},gw={{ gateway }}"
       searchdomain: "{{ searchdomain }}"
       sshkeys: "{{ \"\n\".join(sshkeys)|urlencode|replace('/','%2F') }}"
 

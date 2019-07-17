@@ -6,7 +6,8 @@ proxmox_root_password: "{{ vault_proxmox_root_password }}"
 core_ssh_keys: "{{ vault_core_ssh_keys }}"
 proxmox_domain: "app.lan.rymcg.tech"
 proxmox_master_node: nuc1
-proxmox_public_interface: br0
+proxmox_public_interface: eno1
+proxmox_trunk_interface: vmbr0
 promox_public_network: 192.168.3.0/24
 proxmox_master_ip: 192.168.3.14
 proxmox_public_netmask: 255.255.255.0
@@ -45,28 +46,28 @@ proxmox_nodes:
 ## Virtual Machine subnets:
 ## cluster=False prevents routes between hosts for same subnet
 ## You should keep these sequential for vmbr0, vmbr1, etc...
-proxmox_vm_subnets:
-  - network: 10.10.0.0/24
-    interface: vmbr0
+proxmox_vlans:
+  1000:
+    network: 10.10.0.0/24
     cluster: False
-  - network: 10.10.1.0/24
-    interface: vmbr1
-  - network: 10.10.2.0/24
-    interface: vmbr2
-  - network: 10.10.3.0/24
-    interface: vmbr3
-  - network: 10.10.4.0/24
-    interface: vmbr4
-  - network: 10.10.5.0/24
-    interface: vmbr5
-  - network: 10.10.6.0/24
-    interface: vmbr6
-  - network: 10.10.7.0/24
-    interface: vmbr7
-  - network: 10.10.8.0/24
-    interface: vmbr8
-  - network: 10.10.9.0/24
-    interface: vmbr9
+  100:
+    network: 10.10.1.0/24
+  200:
+    network: 10.10.2.0/24
+  300:
+    network: 10.10.3.0/24
+  400:
+    network: 10.10.4.0/24
+  500:
+    network: 10.10.5.0/24
+  600:
+    network: 10.10.6.0/24
+  700:
+    network: 10.10.7.0/24
+  800:
+    network: 10.10.8.0/24
+  900:
+    network: 10.10.9.0/24
 
 ### Proxmox KVM instance sizes:
 ### (names are loosly based off AWS instance sizes)
